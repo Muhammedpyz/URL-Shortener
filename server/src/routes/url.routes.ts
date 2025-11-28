@@ -5,9 +5,9 @@ const router = Router();
 
 import { authenticate } from '../middleware/auth.middleware';
 
-router.post('/shorten', UrlController.shorten);
-router.get('/debug', UrlController.testDebug); // New debug route
+router.post('/shorten', authenticate, UrlController.shorten);
+router.get('/:shortCode', UrlController.redirect);
 router.delete('/:shortCode', authenticate, UrlController.deleteUrl);
-// router.get('/:shortCode', UrlController.redirect); // Moved to app.ts
+router.get('/debug', UrlController.testDebug); // Moved to app.ts
 
 export default router;
