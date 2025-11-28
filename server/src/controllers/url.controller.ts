@@ -42,7 +42,22 @@ export class UrlController {
             const url = await UrlService.shortenUrl(originalUrl, userId);
 
             // Construct full short URL
-            const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}`;
+            // Priority: 1. Environment Variable, 2. Request Host (Dynamic)
+            let baseUrl = process.env.BASE_URL;
+
+            if (!baseUrl) {
+                const protocol = req.protocol === 'http' ? 'http' : 'https'; // Basic check
+                // In production (Vercel), we usually want https.
+                // req.get('host') gives us the domain (e.g. url-shortener.vercel.app)
+                const host = req.get('host');
+                baseUrl = `${protocol}://${host}`;
+
+                // Force HTTPS on Vercel if not detected
+                if (host?.includes('vercel.app') && !baseUrl.startsWith('https')) {
+                    baseUrl = `https://${host}`;
+                }
+            }
+
             const shortUrl = `${baseUrl}/${url.shortCode}`;
 
             res.status(201).json({
