@@ -99,4 +99,33 @@ export class UrlController {
             res.status(500).json({ error: 'Internal server error' });
         }
     }
+
+    static async testDebug(req: Request, res: Response) {
+        try {
+            // 1. Test DB Connection
+            const userCount = await prisma.user.count();
+
+            // 2. Test Email
+            await EmailService.sendErrorLog(new Error('Test Error from Debug Endpoint'), 'Manual Debug Test');
+
+            res.json({
+                status: 'success',
+                message: 'Debug test complete. Check your email.',
+                dbConnection: 'OK',
+                userCount,
+                env: {
+                    smtpUser: process.env.SMTP_USER ? 'Set' : 'Missing',
+                    smtpPass: process.env.SMTP_PASS ? 'Set' : 'Missing',
+                    dbUrl: process.env.DATABASE_URL ? 'Set' : 'Missing'
+                }
+            });
+        } catch (error: any) {
+            console.error('Debug Test Failed:', error);
+            res.status(500).json({
+                status: 'error',
+                message: error.message,
+                stack: error.stack
+            });
+        }
+    }
 }
