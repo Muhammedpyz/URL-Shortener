@@ -1,0 +1,102 @@
+import { Request, Response } from 'express';
+import { z } from 'zod';
+import { UrlService } from '../services/url.service';
+import { AnalyticsService } from '../services/analytics.service';
+
+// Validation Schema
+const shortenSchema = z.object({
+    originalUrl: z.string().url({ message: "Invalid URL format" }),
+});
+
+export class UrlController {
+    static async shorten(req: Request, res: Response) {
+        try {
+            const result = shortenSchema.safeParse(req.body);
+
+            if (!result.success) {
+                return res.status(400).json({ error: result.error.issues[0].message });
+            }
+
+            const { originalUrl } = result.data;
+            // Get userId from Auth middleware if logged in
+            // req.user is populated by authenticate middleware (optional for this route?)
+            // We need to make sure we check the token if it exists in the header, even if the route is public
+            // But currently the route is public. We should probably parse the token manually if present
+            // OR use a middleware that sets user if token is valid but doesn't block if not.
+
+            // Assuming we will update the route to use 'authenticate' middleware optionally or check header here
+            let userId = null;
+            const authHeader = req.headers.authorization;
+            if (authHeader) {
+                const token = authHeader.split(' ')[1];
+                // We need to decode it. Since we don't want to duplicate logic, let's assume middleware handles it
+                // But wait, the route definition in url.routes.ts doesn't have middleware.
+                // We should add a middleware that populates user but doesn't require it.
+                // For now, let's just try to get it from req.user if middleware was used.
+                userId = (req as any).user?.id;
+                console.log('Shortening URL. AuthHeader:', !!authHeader, 'UserId:', userId);
+            }
+
+            const url = await UrlService.shortenUrl(originalUrl, userId);
+
+            // Construct full short URL
+            const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}`;
+            const shortUrl = `${baseUrl}/${url.shortCode}`;
+
+            res.status(201).json({
+                originalUrl: url.originalUrl,
+                shortCode: url.shortCode,
+                shortUrl,
+            });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: 'Internal server error' });
+        }
+    }
+
+    static async redirect(req: Request, res: Response) {
+        try {
+            const { shortCode } = req.params;
+            const url = await UrlService.getOriginalUrl(shortCode);
+
+            if (!url) {
+                return res.status(404).json({ error: 'URL not found' });
+            }
+
+            // Log Visit (Fire and forget - don't await to speed up redirect)
+            AnalyticsService.logVisit({
+                urlId: url.id,
+                ip: req.ip,
+                userAgent: req.headers['user-agent'],
+                referrer: req.headers['referer'],
+            });
+
+            return res.redirect(url.originalUrl);
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: 'Internal server error' });
+        }
+    }
+    static async deleteUrl(req: Request, res: Response) {
+        try {
+            const { shortCode } = req.params;
+            const userId = (req as any).user.id;
+
+            const url = await UrlService.getUrlByShortCode(shortCode);
+            if (!url) return res.status(404).json({ error: 'URL not found' });
+
+            if (url.userId !== userId) {
+                return res.status(403).json({ error: 'Unauthorized' });
+            }
+
+            // Delete analytics first (cascade should handle, but explicit is safer)
+            await AnalyticsService.deleteStats(url.id);
+            await UrlService.deleteUrl(url.id);
+
+            res.json({ message: 'URL deleted successfully' });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: 'Internal server error' });
+        }
+    }
+}

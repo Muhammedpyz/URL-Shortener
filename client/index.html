@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern URL Kısaltıcı</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="background-glow"></div>
+
+    <nav class="navbar">
+        <div class="logo">✨ Shorty</div>
+        <div class="nav-links" id="navLinks">
+            <button id="loginBtn" class="btn btn-ghost">Giriş Yap</button>
+            <button id="registerBtn" class="btn btn-primary">Kayıt Ol</button>
+        </div>
+        <div class="user-menu hidden" id="userMenu">
+            <button id="myUrlsBtn" class="btn btn-ghost">Linklerim 📂</button>
+            <span id="userUsername" class="user-name"></span>
+            <button id="settingsBtn" class="btn btn-ghost">Ayarlar ⚙️</button>
+            <button id="logoutBtn" class="btn btn-ghost">Çıkış</button>
+        </div>
+    </nav>
+
+    <main class="container">
+        <section class="hero">
+            <h1>Linklerinizi <span class="gradient-text">Kısaltın</span>, Dünyayla Paylaşın.</h1>
+            <p>Hızlı, güvenli ve detaylı analizlerle linklerinizi yönetin.</p>
+
+            <div class="shortener-box">
+                <div class="input-group">
+                    <input type="url" id="urlInput" placeholder="Kısaltmak istediğiniz uzun linki buraya yapıştırın..."
+                        required>
+                    <button id="shortenBtn" class="btn btn-glow">Kısalt 🚀</button>
+                </div>
+                <div id="result" class="result-box hidden">
+                    <span class="label">Kısa Linkiniz:</span>
+                    <div class="link-wrapper">
+                        <a href="#" id="shortLink" target="_blank" class="short-link"></a>
+                        <button id="copyBtn" class="btn btn-icon" title="Kopyala">📋</button>
+                    </div>
+                    <div id="guestWarning" class="warning-text hidden">
+                        ⚠️ Detaylı istatistikler için <a href="#" id="triggerLogin">giriş yapın</a>.
+                    </div>
+                    <button id="statsBtn" class="btn btn-secondary hidden">İstatistikleri Gör 📊</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Auth Modals -->
+        <div id="authModal" class="modal hidden">
+            <div class="modal-content">
+                <span class="close-modal">&times;</span>
+                <div id="loginForm" class="auth-form">
+                    <h2>Giriş Yap</h2>
+                    <input type="email" id="loginEmail" placeholder="E-posta" required>
+                    <input type="password" id="loginPassword" placeholder="Şifre" required>
+                    <button id="submitLogin" class="btn btn-primary full-width">Giriş Yap</button>
+                    <p class="switch-auth">Hesabın yok mu? <a href="#" id="switchToRegister">Kayıt Ol</a></p>
+                </div>
+                <form id="registerForm">
+                    <div class="form-group">
+                        <label for="regUsername">Kullanıcı Adı</label>
+                        <input type="text" id="regUsername" required minlength="3">
+                    </div>
+                    <div class="form-group">
+                        <label for="regEmail">E-posta</label>
+                        <input type="email" id="regEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="regPassword">Şifre</label>
+                        <input type="password" id="regPassword" required minlength="6">
+                    </div>
+                    <button type="submit" class="auth-submit">Kayıt Ol</button>
+                    <p class="auth-switch">Zaten hesabın var mı? <a href="#" id="showLogin">Giriş Yap</a></p>
+                </form>
+            </div>
+        </div>
+
+        <!-- Stats Modal -->
+        <div id="statsModal" class="modal hidden">
+            <div class="modal-content large">
+                <span class="close-modal">&times;</span>
+                <h2>Link İstatistikleri</h2>
+                <div class="stats-summary">
+                    <div class="stat-card">
+                        <h3>Toplam Tıklama</h3>
+                        <p id="totalVisits">0</p>
+                    </div>
+                </div>
+
+                <h3>Son Ziyaretler</h3>
+                <div class="url-list-container">
+                    <table class="url-table">
+                        <thead>
+                            <tr>
+                                <th>Tarih</th>
+                                <th>Konum</th>
+                                <th>Cihaz / Tarayıcı</th>
+                                <th>IP</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lastVisitsList">
+                            <!-- JS ile doldurulacak -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- My URLs Modal -->
+        <div id="myUrlsModal" class="modal hidden">
+            <div class="modal-content large">
+                <span class="close-modal">&times;</span>
+                <h2>Linklerim 📂</h2>
+                <div class="url-list-container">
+                    <table class="url-table">
+                        <thead>
+                            <tr>
+                                <th>Kısa Link</th>
+                                <th>Orijinal Link</th>
+                                <th>Tıklama</th>
+                                <th>Tarih</th>
+                                <th>İşlem</th>
+                            </tr>
+                        </thead>
+                        <tbody id="myUrlsList">
+                            <!-- JS ile doldurulacak -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Verification Modal -->
+    <div id="verificationModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>E-posta Doğrulama</h2>
+            <p>E-postanıza gönderilen 6 haneli kodu girin.</p>
+            <form id="verificationForm">
+                <div class="form-group">
+                    <input type="text" id="verifyCode" placeholder="KOD" maxlength="6"
+                        style="text-align: center; letter-spacing: 5px; font-size: 24px;" required>
+                </div>
+                <button type="submit" class="auth-submit">Doğrula</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Profile/Delete Modal -->
+    <div id="profileModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Hesap Ayarları</h2>
+            <div class="user-info-display"
+                style="margin-bottom: 20px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                <p><strong>Kullanıcı Adı:</strong> <span id="settingsUsername"></span></p>
+                <p><strong>E-posta:</strong> <span id="settingsEmail"></span></p>
+            </div>
+            <div class="danger-zone">
+                <h3>Tehlikeli Bölge</h3>
+                <p>Hesabınızı ve tüm linklerinizi kalıcı olarak silmek için:</p>
+                <button id="initiateDeleteBtn" class="delete-btn">Hesabımı Sil</button>
+            </div>
+
+            <!-- Step 1: Password Confirm -->
+            <div id="deleteStep1" class="hidden">
+                <p>Güvenliğiniz için şifrenizi girin:</p>
+                <input type="password" id="deletePassword" placeholder="Şifreniz">
+                <button id="confirmDeletePassword" class="auth-submit">Devam Et</button>
+            </div>
+
+            <!-- Step 2: Email Code -->
+            <div id="deleteStep2" class="hidden">
+                <p>E-postanıza gelen silme kodunu girin:</p>
+                <input type="text" id="deleteCode" placeholder="SİLME KODU">
+                <button id="finalDeleteBtn" class="delete-btn">Hesabı Kalıcı Olarak Sil</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
