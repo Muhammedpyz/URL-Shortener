@@ -2,7 +2,6 @@
 
 Bu proje, modern web teknolojileri kullanılarak geliştirilmiş, tam özellikli bir URL kısaltma servisidir. Kullanıcılar uzun linklerini kısaltabilir, tıklanma istatistiklerini takip edebilir ve hesap oluşturarak linklerini yönetebilirler.
 
-![Project Screenshot](https://via.placeholder.com/800x400?text=URL+Shortener+Preview)
 
 ## ✨ Özellikler
 
@@ -38,8 +37,7 @@ Projeyi kendi bilgisayarınızda çalıştırmak için:
 
 1.  **Repoyu klonlayın:**
     ```bash
-    git clone https://github.com/KULLANICI_ADINIZ/REPO_ADINIZ.git
-    cd level1
+    git clone https://github.com/Muhammedpyz/URL-Shortener.git
     ```
 
 2.  **Bağımlılıkları yükleyin:**
