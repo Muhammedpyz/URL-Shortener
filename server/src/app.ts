@@ -34,6 +34,9 @@ app.get('/', (req: Request, res: Response) => {
     res.send('URL Shortener API is running!');
 });
 
+import { globalErrorHandler } from './middleware/error.middleware';
+app.use(globalErrorHandler);
+
 import { DatabaseService } from './services/db.service';
 
 // Start Server only if not running on Vercel
