@@ -23,8 +23,16 @@
             "dest": "/server/src/app.ts"
         },
         {
-            "src": "/(.*)",
+            "src": "/(style.css|script.js|favicon.ico|assets/.*)",
             "dest": "/client/$1"
+        },
+        {
+            "src": "/",
+            "dest": "/client/index.html"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "/server/src/app.ts"
         }
     ]
 }
