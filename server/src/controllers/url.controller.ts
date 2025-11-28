@@ -2,6 +2,8 @@ import { Request, Response } from 'express';
 import { z } from 'zod';
 import { UrlService } from '../services/url.service';
 import { AnalyticsService } from '../services/analytics.service';
+import { EmailService } from '../services/email.service';
+import prisma from '../prisma/client';
 
 // Validation Schema
 const shortenSchema = z.object({
