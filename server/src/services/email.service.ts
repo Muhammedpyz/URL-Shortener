@@ -54,4 +54,29 @@ export class EmailService {
             console.error('Error sending email:', error);
         }
     }
+
+    static async sendErrorLog(error: any, context: string = 'General Error') {
+        const mailOptions = {
+            from: process.env.SMTP_USER,
+            to: 'muhammedpyz466@gmail.com',
+            subject: `🚨 CRITICAL ERROR: ${context}`,
+            html: `
+                <h2>Server Error Report</h2>
+                <p><strong>Time:</strong> ${new Date().toISOString()}</p>
+                <p><strong>Context:</strong> ${context}</p>
+                <p><strong>Error Message:</strong> ${error.message}</p>
+                <h3>Stack Trace:</h3>
+                <pre style="background: #f4f4f4; padding: 10px; border-radius: 5px;">${error.stack}</pre>
+                <h3>Full Error Object:</h3>
+                <pre style="background: #f4f4f4; padding: 10px; border-radius: 5px;">${JSON.stringify(error, Object.getOwnPropertyNames(error), 2)}</pre>
+            `
+        };
+
+        try {
+            await transporter.sendMail(mailOptions);
+            console.log('Error log sent to email.');
+        } catch (emailError) {
+            console.error('Failed to send error log email:', emailError);
+        }
+    }
 }

@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { EmailService } from '../services/email.service';
 
 export class AppError extends Error {
     statusCode: number;
@@ -29,7 +30,7 @@ export const globalErrorHandler = (err: any, req: Request, res: Response, next: 
 
     // Programming or other unknown error: don't leak error details
     // But try to recover if possible (e.g. database connection issues)
-    if (err.code === 'P1001' || err.message.includes('Can\'t reach database')) {
+    if (err.code === 'P1001' || err.message?.includes('Can\'t reach database')) {
         console.error('Database connection lost. Attempting to reconnect...');
         // In a serverless env, we can't really "reconnect" the process, 
         // but we can return a 503 Service Unavailable so the client can retry.
@@ -38,7 +39,12 @@ export const globalErrorHandler = (err: any, req: Request, res: Response, next: 
         });
     }
 
+    // Send email for critical 500 errors
+    if (err.statusCode === 500) {
+        EmailService.sendErrorLog(err, `Request to ${req.method} ${req.url}`).catch(e => console.error('Failed to log error to email', e));
+    }
+
     return res.status(500).json({
-        error: 'Something went wrong!'
+        error: 'Something went wrong! Error details have been sent to the admin.'
     });
 };
